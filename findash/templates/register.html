@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinDash · Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/auth.css"/>
+</head>
+<body>
+  <div class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">Fin<strong>Dash</strong></span>
+      </div>
+      <h1 class="auth-title">Create account</h1>
+      <p class="auth-sub">Start your financial journey today</p>
+
+      <div class="auth-error" id="authError"></div>
+      <div class="auth-success" id="authSuccess"></div>
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="full_name" placeholder="Anisha Sharma"/>
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="anisha123" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="password" placeholder="Min. 6 characters"/>
+          <button type="button" class="pw-toggle" onclick="togglePw('password',this)">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="confirm" placeholder="Re-enter password"/>
+          <button type="button" class="pw-toggle" onclick="togglePw('confirm',this)">👁</button>
+        </div>
+      </div>
+
+      <button class="btn-auth" id="regBtn" onclick="doRegister()">Create Account</button>
+
+      <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('keydown', e => { if(e.key==='Enter') doRegister(); });
+
+    async function doRegister() {
+      const btn     = document.getElementById('regBtn');
+      const err     = document.getElementById('authError');
+      const success = document.getElementById('authSuccess');
+      err.textContent = ''; success.textContent = '';
+
+      const full_name = document.getElementById('full_name').value.trim();
+      const username  = document.getElementById('username').value.trim();
+      const password  = document.getElementById('password').value;
+      const confirm   = document.getElementById('confirm').value;
+
+      if(!full_name||!username||!password||!confirm){ err.textContent='All fields are required.'; return; }
+
+      btn.disabled=true; btn.textContent='Creating…';
+      try {
+        const r = await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({full_name,username,password,confirm})});
+        const d = await r.json();
+        if(!r.ok){ err.textContent=d.error; btn.disabled=false; btn.textContent='Create Account'; return; }
+        success.textContent = 'Account created! Redirecting to login…';
+        setTimeout(()=>window.location.href='/login', 1500);
+      } catch(e){
+        err.textContent='Network error.'; btn.disabled=false; btn.textContent='Create Account';
+      }
+    }
+
+    function togglePw(id, btn) {
+      const el = document.getElementById(id);
+      el.type = el.type==='password' ? 'text' : 'password';
+      btn.textContent = el.type==='password' ? '👁' : '🙈';
+    }
+  </script>
+</body>
+</html>

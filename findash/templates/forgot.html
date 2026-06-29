@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinDash · Forgot Password</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/auth.css"/>
+</head>
+<body>
+  <div class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">Fin<strong>Dash</strong></span>
+      </div>
+
+      <!-- Step 1: Enter username -->
+      <div id="step1">
+        <h1 class="auth-title">Forgot Password</h1>
+        <p class="auth-sub">Enter your username to retrieve your security questions</p>
+        <div class="auth-error" id="err1"></div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="fp_username" placeholder="your_username"/>
+        </div>
+        <button class="btn-auth" onclick="step1()">Continue</button>
+        <p class="auth-switch"><a href="/login">← Back to Login</a></p>
+      </div>
+
+      <!-- Step 2: Answer security questions -->
+      <div id="step2" style="display:none">
+        <h1 class="auth-title">Security Questions</h1>
+        <p class="auth-sub">Answer both questions to verify your identity</p>
+        <div class="auth-error" id="err2"></div>
+        <div class="form-group">
+          <label id="q1_label">Question 1</label>
+          <input type="text" id="fp_a1" placeholder="Your answer"/>
+        </div>
+        <div class="form-group">
+          <label id="q2_label">Question 2</label>
+          <input type="text" id="fp_a2" placeholder="Your answer"/>
+        </div>
+        <button class="btn-auth" onclick="step2()">Verify Answers</button>
+      </div>
+
+      <!-- Step 3: New password -->
+      <div id="step3" style="display:none">
+        <h1 class="auth-title">Reset Password</h1>
+        <p class="auth-sub">Set your new password</p>
+        <div class="auth-error" id="err3"></div>
+        <div class="auth-success" id="suc3"></div>
+        <div class="form-group">
+          <label>New Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="fp_newpw" placeholder="Min. 6 characters"/>
+            <button type="button" class="pw-toggle" onclick="togglePw('fp_newpw',this)">👁</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="fp_confirm" placeholder="Re-enter password"/>
+            <button type="button" class="pw-toggle" onclick="togglePw('fp_confirm',this)">👁</button>
+          </div>
+        </div>
+        <button class="btn-auth" onclick="step3()">Reset Password</button>
+      </div>
+
+    </div>
+  </div>
+  <script>
+    let _username = '';
+
+    async function step1() {
+      const err = document.getElementById('err1');
+      err.textContent = '';
+      _username = document.getElementById('fp_username').value.trim();
+      if(!_username){ err.textContent='Enter your username.'; return; }
+      const r = await fetch('/api/auth/get-security-questions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:_username})});
+      const d = await r.json();
+      if(!r.ok){ err.textContent=d.error; return; }
+      document.getElementById('q1_label').textContent = d.sq1;
+      document.getElementById('q2_label').textContent = d.sq2;
+      document.getElementById('step1').style.display='none';
+      document.getElementById('step2').style.display='block';
+    }
+
+    async function step2() {
+      const err = document.getElementById('err2');
+      err.textContent = '';
+      const a1 = document.getElementById('fp_a1').value.trim();
+      const a2 = document.getElementById('fp_a2').value.trim();
+      if(!a1||!a2){ err.textContent='Answer both questions.'; return; }
+      const r = await fetch('/api/auth/verify-answers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:_username,sq1_answer:a1,sq2_answer:a2})});
+      const d = await r.json();
+      if(!r.ok){ err.textContent=d.error; return; }
+      document.getElementById('step2').style.display='none';
+      document.getElementById('step3').style.display='block';
+    }
+
+    async function step3() {
+      const err = document.getElementById('err3');
+      const suc = document.getElementById('suc3');
+      err.textContent=''; suc.textContent='';
+      const pw = document.getElementById('fp_newpw').value;
+      const cn = document.getElementById('fp_confirm').value;
+      if(!pw||!cn){ err.textContent='Fill in both fields.'; return; }
+      const r = await fetch('/api/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({new_password:pw,confirm:cn})});
+      const d = await r.json();
+      if(!r.ok){ err.textContent=d.error; return; }
+      suc.textContent='Password reset! Redirecting to login…';
+      setTimeout(()=>window.location.href='/login', 1800);
+    }
+
+    function togglePw(id, btn) {
+      const el = document.getElementById(id);
+      el.type = el.type==='password' ? 'text' : 'password';
+      btn.textContent = el.type==='password' ? '👁' : '🙈';
+    }
+  </script>
+</body>
+</html>

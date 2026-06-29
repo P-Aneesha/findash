@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinDash · Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">◈</span>
+    <span class="logo-text">Fin<strong>Dash</strong></span>
+  </div>
+
+  <!-- User pill -->
+  <div class="user-pill">
+    <div class="user-avatar" id="sidebarAvatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Loading…</div>
+      <div class="user-role">Personal Finance</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-section="dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="#" class="nav-item" data-section="transactions">
+      <svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
+      Transactions
+    </a>
+    <a href="#" class="nav-item" data-section="analytics">
+      <svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      Analytics
+    </a>
+    <a href="#" class="nav-item" data-section="goals">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Goals & Planner
+    </a>
+    <a href="#" class="nav-item" data-section="alerts">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Alerts
+    </a>
+    <a href="#" class="nav-item" data-section="profile">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="btn-report" onclick="generatePDF()">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Download Report
+    </button>
+    <button class="btn-logout" onclick="doLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main" id="main">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <div class="page-title" id="pageTitle">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="date-badge" id="dateBadge"></div>
+      <div class="health-badge">
+        <span class="hb-label">Health</span>
+        <span class="hb-score" id="topHealthScore">—</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════ DASHBOARD ══════ -->
+  <section class="section active" id="sec-dashboard">
+
+    <!-- Row 1: KPI Cards (7 cards) -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card income">
+        <div class="kpi-icon">↑</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Total Income</div>
+          <div class="kpi-value" id="kpiIncome">₹0</div>
+        </div>
+      </div>
+      <div class="kpi-card expense">
+        <div class="kpi-icon">↓</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Total Expenses</div>
+          <div class="kpi-value" id="kpiExpense">₹0</div>
+        </div>
+      </div>
+      <div class="kpi-card balance">
+        <div class="kpi-icon">◎</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Net Balance</div>
+          <div class="kpi-value" id="kpiBalance">₹0</div>
+        </div>
+      </div>
+      <div class="kpi-card savings">
+        <div class="kpi-icon">%</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Savings Rate</div>
+          <div class="kpi-value" id="kpiSavings">0%</div>
+        </div>
+      </div>
+      <div class="kpi-card daily-inc">
+        <div class="kpi-icon">☀</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Daily Income</div>
+          <div class="kpi-value" id="kpiDailyInc">₹0</div>
+        </div>
+      </div>
+      <div class="kpi-card daily-exp">
+        <div class="kpi-icon">🌙</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Daily Expense</div>
+          <div class="kpi-value" id="kpiDailyExp">₹0</div>
+        </div>
+      </div>
+      <div class="kpi-card txn-total">
+        <div class="kpi-icon">#</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Total Transactions</div>
+          <div class="kpi-value" id="kpiTxnTotal">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Health Score + Monthly Trend -->
+    <div class="dash-row two-col">
+      <div class="card health-card">
+        <div class="card-header">
+          <h3>FinHealth Score</h3>
+          <span class="badge-info">0 – 100</span>
+        </div>
+        <div class="score-ring-wrap">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="50"/>
+            <circle class="ring-fill" cx="60" cy="60" r="50" id="ringFill"/>
+          </svg>
+          <div class="score-center">
+            <span class="score-num" id="scoreNum">—</span>
+            <span class="score-grade" id="scoreGrade">—</span>
+          </div>
+        </div>
+        <div class="score-legend">
+          <span class="leg poor">0–39 Poor</span>
+          <span class="leg fair">40–69 Fair</span>
+          <span class="leg good">70–100 Good</span>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="card-header">
+          <h3>Monthly Trend</h3>
+          <span class="badge-info">Last 6 months</span>
+        </div>
+        <div class="chart-wrap-sq">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Category Doughnut + 3-Month Line -->
+    <div class="dash-row two-col">
+      <div class="card chart-card">
+        <div class="card-header"><h3>Expense by Category</h3></div>
+        <div class="chart-wrap-sq">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+      <div class="card chart-card">
+        <div class="card-header">
+          <h3>3-Month Income vs Expense</h3>
+          <span class="badge-info">Line graph</span>
+        </div>
+        <div class="chart-wrap-sq">
+          <canvas id="lineChart3m"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card recs-card">
+      <div class="card-header"><h3>Personalised Recommendations</h3></div>
+      <ul class="recs-list" id="recsList">
+        <li class="rec-empty">Add transactions to generate recommendations.</li>
+      </ul>
+    </div>
+
+  </section>
+
+  <!-- ══════ TRANSACTIONS ══════ -->
+  <section class="section" id="sec-transactions">
+    <div class="section-header-row">
+      <h2>Transactions</h2>
+      <div class="header-btns">
+        <button class="btn-secondary" onclick="openModal('importTxn')">⬆ Import from Bank Message</button>
+        <button class="btn-primary" onclick="openModal('addTxn')">+ Add Transaction</button>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-filters">
+        <input type="text" id="txnSearch" placeholder="Search by category, description, date…" oninput="filterTxns()"/>
+        <select id="txnTypeFilter" onchange="filterTxns()">
+          <option value="">All Types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="txnTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time Saved</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="txnBody">
+            <tr><td colspan="7" class="empty-row">No transactions yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ ANALYTICS ══════ -->
+  <section class="section" id="sec-analytics">
+    <h2>Deep Analytics</h2>
+
+    <div class="analytics-grid">
+      <div class="card stat-card">
+        <div class="stat-label">Avg Weekday Spend/day</div>
+        <div class="stat-value" id="avgWeekday">₹0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Avg Weekend Spend/day</div>
+        <div class="stat-value" id="avgWeekend">₹0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Weekend Spend Ratio</div>
+        <div class="stat-value" id="weekendRatio">—</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Active Goals</div>
+        <div class="stat-value" id="goalCount">0</div>
+      </div>
+    </div>
+
+    <!-- Weekly Spending Bar -->
+    <div class="dash-row two-col">
+      <div class="card chart-card">
+        <div class="card-header"><h3>Weekly Spending Pattern</h3><span class="badge-info">By day of week</span></div>
+        <div class="chart-wrap"><canvas id="weeklyChart"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="card-header"><h3>Weekday vs Weekend</h3><span class="badge-info">Average/day</span></div>
+        <div class="chart-wrap"><canvas id="weekendChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Monthly + Category -->
+    <div class="dash-row two-col" style="margin-top:16px">
+      <div class="card chart-card">
+        <div class="card-header"><h3>Income vs Expense (6-Month)</h3></div>
+        <div class="chart-wrap"><canvas id="analyticsLineChart"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="card-header"><h3>Expense Distribution</h3></div>
+        <div class="chart-wrap"><canvas id="analyticsPieChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Monthly breakdown table -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-header"><h3>Monthly Breakdown</h3></div>
+      <div class="table-wrap">
+        <table class="data-table" id="monthlyTable">
+          <thead><tr><th>Month</th><th>Income</th><th>Expense</th><th>Net</th><th>Savings %</th></tr></thead>
+          <tbody id="monthlyTableBody"><tr><td colspan="5" class="empty-row">No data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ GOALS ══════ -->
+  <section class="section" id="sec-goals">
+    <div class="section-header-row">
+      <h2>Goals &amp; Purchase Planner</h2>
+      <button class="btn-primary" onclick="openModal('addGoal')">+ New Goal</button>
+    </div>
+    <div class="goals-grid" id="goalsGrid">
+      <div class="goal-empty">No goals yet. Add one to start planning.</div>
+    </div>
+  </section>
+
+  <!-- ══════ ALERTS ══════ -->
+  <section class="section" id="sec-alerts">
+    <h2>Smart Alerts</h2>
+    <div class="alerts-list" id="alertsList">
+      <div class="alert-empty">✅ No alerts. Your finances look clean!</div>
+    </div>
+  </section>
+
+  <!-- ══════ PROFILE ══════ -->
+  <section class="section" id="sec-profile">
+    <h2>My Profile</h2>
+    <div class="profile-grid">
+
+      <!-- Edit Profile -->
+      <div class="card profile-card">
+        <div class="card-header"><h3>Personal Information</h3></div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="pFullName" placeholder="Your full name"/>
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="pUsername" disabled style="opacity:0.5;cursor:not-allowed"/>
+        </div>
+        <div class="auth-error" id="profileErr"></div>
+        <div class="auth-success" id="profileSuc"></div>
+        <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+      </div>
+
+      <!-- Change Password -->
+      <div class="card profile-card">
+        <div class="card-header"><h3>Change Password</h3></div>
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="pOldPw" placeholder="••••••••"/>
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="pNewPw" placeholder="Min. 6 characters"/>
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="pConfirmPw" placeholder="Re-enter new password"/>
+        </div>
+        <div class="auth-error" id="pwErr"></div>
+        <div class="auth-success" id="pwSuc"></div>
+        <button class="btn-primary" onclick="changePassword()">Update Password</button>
+      </div>
+
+      <!-- Security Questions -->
+      <div class="card profile-card profile-card-wide">
+        <div class="card-header">
+          <h3>Security Questions</h3>
+          <span class="badge-info">Used for password recovery</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Question 1</label>
+            <select id="pSq1Q">
+              <option value="">Select a question…</option>
+              <option>What is your favourite food?</option>
+              <option>What is your favourite color?</option>
+              <option>What was your first school?</option>
+              <option>What is your pet's name?</option>
+              <option>What is your mother's maiden name?</option>
+              <option>What city were you born in?</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Answer 1</label>
+            <input type="text" id="pSq1A" placeholder="Your answer"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Question 2</label>
+            <select id="pSq2Q">
+              <option value="">Select a question…</option>
+              <option>What is your favourite food?</option>
+              <option>What is your favourite color?</option>
+              <option>What was your first school?</option>
+              <option>What is your pet's name?</option>
+              <option>What is your mother's maiden name?</option>
+              <option>What city were you born in?</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Answer 2</label>
+            <input type="text" id="pSq2A" placeholder="Your answer"/>
+          </div>
+        </div>
+        <div class="auth-error" id="sqErr"></div>
+        <div class="auth-success" id="sqSuc"></div>
+        <button class="btn-primary" onclick="saveSecurityQuestions()">Save Security Questions</button>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Add Transaction -->
+<div class="modal-overlay" id="modal-addTxn">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Transaction</h3>
+      <button class="modal-close" onclick="closeModal('addTxn')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Type</label>
+          <select id="txnType">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount (₹)</label>
+          <input type="number" id="txnAmount" placeholder="e.g. 5000" min="1"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="txnCategory">
+            <option value="Salary">Salary</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Investment">Investment</option>
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Rent">Rent</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="txnDate"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description (optional)</label>
+        <input type="text" id="txnDesc" placeholder="e.g. Grocery run at D-Mart"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('addTxn')">Cancel</button>
+      <button class="btn-primary" onclick="submitTransaction()">Save Transaction</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Bank Message -->
+<div class="modal-overlay" id="modal-importTxn">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3>Import from Bank Message</h3>
+      <button class="modal-close" onclick="closeModal('importTxn')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:8px;">
+        Paste your bank SMS or notification text below. The system will automatically detect the amount, type, date, and merchant.
+      </p>
+      <div class="form-group">
+        <label>Bank Message Text</label>
+        <textarea id="importMsgText" rows="5" placeholder="e.g. Dear Customer, INR 1500.00 has been debited from your A/C XXXXXX1234 on 15-06-2025 at Zomato. Available balance: INR 23,450.00. — HDFC Bank"></textarea>
+      </div>
+      <div class="import-preview" id="importPreview" style="display:none">
+        <div class="import-preview-title">Parsed Transaction Preview</div>
+        <div class="import-preview-grid" id="importPreviewGrid"></div>
+      </div>
+      <div class="auth-error" id="importErr"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('importTxn')">Cancel</button>
+      <button class="btn-secondary" onclick="previewImport()">Preview</button>
+      <button class="btn-primary" id="importConfirmBtn" onclick="confirmImport()" style="display:none">Confirm Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Goal -->
+<div class="modal-overlay" id="modal-addGoal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>New Financial Goal</h3>
+      <button class="modal-close" onclick="closeModal('addGoal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Goal Name</label>
+        <input type="text" id="goalName" placeholder="e.g. Buy MacBook Pro"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Target Amount (₹)</label>
+          <input type="number" id="goalTarget" placeholder="e.g. 150000" min="1"/>
+        </div>
+        <div class="form-group">
+          <label>Already Saved (₹)</label>
+          <input type="number" id="goalSaved" placeholder="0" min="0"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Target Deadline</label>
+        <input type="date" id="goalDeadline"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('addGoal')">Cancel</button>
+      <button class="btn-primary" onclick="submitGoal()">Save Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
